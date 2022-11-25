@@ -8,7 +8,7 @@ import pandas as pd
 logger = logging.getLogger(__name__)
 
 
-def save_in_time_stream(data: pd.DataFrame) -> None:
+def save_data_to_timestream(data: pd.DataFrame) -> None:
     """
 
     Args:
@@ -20,12 +20,12 @@ def save_in_time_stream(data: pd.DataFrame) -> None:
    Returns: None
 
     """
-    records = data.apply(convert_series_to_dict, axis=1)
-
     time_stream = boto3.client("timestream-write",
                                aws_access_key_id=os.getenv("AWS_KEY"),
                                aws_secret_access_key=os.getenv("AWS_SECRET"))
     logger.info("successfully connected to timestream-write client")
+
+    records = data.apply(convert_series_to_dict, axis=1)
 
     time_stream.write_records(DatabaseName='spotify',
                               TableName='albums',
