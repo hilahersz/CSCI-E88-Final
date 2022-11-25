@@ -8,11 +8,11 @@ import pandas as pd
 logger = logging.getLogger(__name__)
 
 
-def save_data_to_timestream(data: pd.DataFrame) -> None:
+def save_data_to_timestream(df: pd.DataFrame) -> None:
     """
 
     Args:
-        data: Dataframe with information about Spotify's aggregated stats per album. Minimal columns:
+        df: Dataframe with information about Spotify's aggregated stats per album. Minimal columns:
             track_popularity
             artist
             album
@@ -25,7 +25,7 @@ def save_data_to_timestream(data: pd.DataFrame) -> None:
                                aws_secret_access_key=os.getenv("AWS_SECRET"))
     logger.info("successfully connected to timestream-write client")
 
-    records = data.apply(convert_series_to_dict, axis=1)
+    records = df.apply(convert_series_to_dict, axis=1)
 
     time_stream.write_records(DatabaseName='spotify',
                               TableName='albums',
