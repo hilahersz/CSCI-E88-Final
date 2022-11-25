@@ -1,5 +1,4 @@
 from typing import List
-from datetime import datetime
 from tempfile import TemporaryDirectory
 
 import dask.dataframe as dd
@@ -8,17 +7,26 @@ import pandas as pd
 GROUP_KEY = ["artist", "album"]
 
 
-def aggregate_data(
-        agg_func: callable,
-        dfs: List[pd.DataFrame]
-):
+def aggregate_data(agg_func: callable, dfs: List[pd.DataFrame]) -> pd.DataFrame:
+
+    """
+    Dask batch processor template for aggregations
+    Args:
+        agg_func: a callable to aggregate the csv files on
+        dfs: a list of dataframes to be aggregated
+
+    Returns:
+
+    """
+
     with TemporaryDirectory() as d:
         for df in dfs:
             artist_key = df['artist'][0]
             file_path = f"{d}/{artist_key}.csv"
             df.to_csv(file_path, index=False)
         files_path = f"{d}/*.csv"
-        agg_func(files_path)
+
+        return agg_func(files_path)
 
 
 def transform_dask_to_time_stream(files_path: str) -> pd.DataFrame:
@@ -30,7 +38,7 @@ def transform_dask_to_time_stream(files_path: str) -> pd.DataFrame:
     Returns: a single dataframe for all artists with the following columns:
         artist: name of artist
         album: name of album
-        track_popularity: the mean popularity
+        track_popularity: the mean popularity of tracks in album
     """
 
     ddf = dd.read_csv(files_path)
@@ -53,7 +61,7 @@ def transform_dask_to_es(files_path: str) -> pd.DataFrame:
 
     Returns: a single dataframe for all artists with the following columns:
         artist: name of artist
-        track_popularity: average popularity across different tracks
+        track_popularity: average popularity across artist's tracks
         artist_followers: count of followers of the artist
     """
     ddf = dd.read_csv(files_path)
