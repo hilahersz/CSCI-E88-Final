@@ -24,7 +24,7 @@ def collect_data_from_spotify(artists: List[str] = None) -> List[pd.DataFrame]:
     Args:
         artists [optional]: list of artists required for the collection
 
-    Returns: Generator of dataframes with collected data from Spotify.
+    Returns: List of dataframes with collected data from Spotify.
 
     """
     if artists is None:
@@ -45,7 +45,8 @@ def collect_data_from_spotify(artists: List[str] = None) -> List[pd.DataFrame]:
 
 
 def get_artist_top_tracks(sp: spotipy.Spotify,
-                          artists: List[dict], ) -> pd.DataFrame:
+                          artists: List[dict],
+                          ) -> List[dict]:
     """
     Get the top tracks per artist
     Args:
@@ -60,11 +61,12 @@ def get_artist_top_tracks(sp: spotipy.Spotify,
         return sp.artist_top_tracks(artist.get('id')).get('tracks')
 
     top_tracks = map(get_top_tracks, artists)
-    return top_tracks
+    return list(top_tracks)
 
 
 def get_artist_by_name(sp: spotipy.Spotify,
-                       artists_names: List[str]):
+                       artists_names: List[str],
+                       ) -> List[dict]:
     """
     Get the spotipy artist object by name search
     Args:
@@ -81,25 +83,40 @@ def get_artist_by_name(sp: spotipy.Spotify,
         logger.info("successfully fetched artist object", extra={"artist": artist})
         return artist_obj
 
-    return map(get_artist, artists_names)
+    artists = map(get_artist, artists_names)
+    return list(artists)
 
 
 def get_tracks_view(tracks: List[dict],
                     artists: List[dict]
-                    ) -> pd.DataFrame:
-    def get_track_info(track, artist) -> dict:
-        track_info = {
-            "artist": artist.get('name'),
-            "artist_popularity": artist.get('popularity'),
-            "artist_followers": artist.get('followers').get('total'),
-            "album": track.get('album').get('name'),
-            "track": track.get('name'),
-            "track_id": track.get('id'),
-            "track_popularity": track.get('popularity')
-        }
-        return track_info
+                    ) -> List[pd.DataFrame]:
+    """
+    A method to extract dataframe from artists and tracks information
 
-    data = map(get_track_info, zip(tracks, artists))
+    Args:
+        tracks: list of track information
+        artists: list of artists information
+
+    Returns: list of DataFrames; one per artist
+
+    """
+
+    def get_track_info(artist_tracks, artist) -> List[dict]:
+        artist_data = []
+        for track in artist_tracks:
+            track_info = {
+                "artist": artist.get('name'),
+                "artist_popularity": artist.get('popularity'),
+                "artist_followers": artist.get('followers').get('total'),
+                "album": track.get('album').get('name'),
+                "track": track.get('name'),
+                "track_id": track.get('id'),
+                "track_popularity": track.get('popularity')
+            }
+            artist_data.append(track_info)
+        return artist_data
+
+    data = [get_track_info(t, a) for t, a in zip(tracks, artists)]
     dfs = map(pd.DataFrame.from_dict, data)
 
     return list(dfs)
