@@ -1,6 +1,7 @@
 import os
 import logging
 from datetime import datetime
+from functools import partial
 
 import boto3
 import pandas as pd
@@ -25,7 +26,10 @@ def save_data_to_timestream(df: pd.DataFrame) -> None:
                                aws_secret_access_key=os.getenv("AWS_SECRET"))
     logger.info("successfully connected to timestream-write client")
 
-    records = df.apply(convert_series_to_dict, axis=1)
+    date = str(int(datetime.timestamp(datetime.now()) * 1000))
+    convert_series_now = partial(convert_series_to_dict, date=date)
+
+    records = df.apply(convert_series_now, axis=1)
 
     time_stream.write_records(DatabaseName='spotify',
                               TableName='albums',
@@ -35,7 +39,7 @@ def save_data_to_timestream(df: pd.DataFrame) -> None:
                 extra={"database": "spotify", "table": "albums", "batch_size": len(records)})
 
 
-def convert_series_to_dict(row: pd.Series) -> dict:
+def convert_series_to_dict(row: pd.Series, date: str) -> dict:
     """
 
     Args:
@@ -43,12 +47,12 @@ def convert_series_to_dict(row: pd.Series) -> dict:
             track_popularity
             artist
             album
+        date: str representation of processing time
 
     Returns: a record to match AWS TimeStream format
 
     """
-    time = str(int(datetime.timestamp(datetime.now()) * 1000))
-    record = {"Time": time,
+    record = {"Time": date,
               "MeasureValue": str(row['track_popularity']),
               "MeasureValueType": "DOUBLE",
               "MeasureName": "popularity",
