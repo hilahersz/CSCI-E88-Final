@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import List
 import logging
 
@@ -38,8 +39,6 @@ def collect_data_from_spotify(artists: List[str] = None) -> List[pd.DataFrame]:
     artists = get_artist_by_name(sp, artists)
     top_tracks = get_artist_top_tracks(sp, artists)
     tracks_view = get_tracks_view(top_tracks, artists)
-
-    logger.info("completed tracks lazy-load assignment")
 
     return tracks_view
 
@@ -102,6 +101,7 @@ def get_tracks_view(tracks: List[dict],
     """
 
     def get_track_info(artist_tracks, artist) -> List[dict]:
+        date = datetime.now().date()
         artist_data = []
         for track in artist_tracks:
             track_info = {
@@ -111,7 +111,8 @@ def get_tracks_view(tracks: List[dict],
                 "album": track.get('album').get('name'),
                 "track": track.get('name'),
                 "track_id": track.get('id'),
-                "track_popularity": track.get('popularity')
+                "track_popularity": track.get('popularity'),
+                "date": date
             }
             artist_data.append(track_info)
         return artist_data
