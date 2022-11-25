@@ -1,0 +1,23 @@
+>> PUT /artists
+{
+  "mappings": {
+    "properties": {
+      "artistId": {
+        "type": "keyword"
+      },
+      "eventTime": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss"
+      },
+      "artist": {
+        "type": "keyword"
+      },
+      "popularity": {
+        "type" : "double"
+      },
+    "followers": {
+        "type" : "double"
+        }
+    }
+  }
+}

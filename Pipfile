@@ -1,0 +1,19 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+numpy = "*"
+pandas = "*"
+spotipy = "*"
+boto3 = "*"
+s3fs = "*"
+dask = "*"
+elasticsearch = "*"
+python-json-logger = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.10"
