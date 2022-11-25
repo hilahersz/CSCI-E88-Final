@@ -21,8 +21,8 @@ def execute_pipeline():
     logger.info(COMPLETED_MESSAGE, extra={"tier": "master storage"})
 
     # Batch Processing Tier
-    es_data = aggregate_data(dfs, transform_dask_to_es)
-    ts_data = aggregate_data(dfs, transform_dask_to_time_stream)
+    es_data = aggregate_data(transform_dask_to_es, dfs)
+    ts_data = aggregate_data(transform_dask_to_time_stream, dfs)
     logger.info(COMPLETED_MESSAGE, extra={"tier": "batch processing"})
 
     # Real time views Tier
@@ -32,6 +32,8 @@ def execute_pipeline():
     # Visualization Tier
     save_data_to_es(es_data)
     logger.info(COMPLETED_MESSAGE, extra={"tier": "visualization"})
+
+    logger.info("pipeline executed successfully!")
 
 
 if __name__ == '__main__':
